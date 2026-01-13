@@ -17,4 +17,8 @@
            #:tbl-ref
            #:slice
            #:glimpse
+           #:slice
+           #:glimpse
+           #:bind-rows
+           #:bind-cols
            #:unknown-column-error))
