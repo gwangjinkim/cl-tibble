@@ -8,7 +8,8 @@
                 :components
                 ((:file "package")
                  (:file "conditions" :depends-on ("package"))
-                 (:file "tbl" :depends-on ("package")))))
+                 (:file "tbl" :depends-on ("package"))
+                 (:file "construct" :depends-on ("tbl")))))
   :in-order-to ((asdf:test-op (asdf:test-op "cl-tibble/test"))))
 
 (asdf:defsystem "cl-tibble/test"
@@ -19,5 +20,7 @@
   :components ((:module "test"
                 :components
                 ((:file "package")
-                 (:file "suite" :depends-on ("package")))))
+                 (:file "suite" :depends-on ("package"))
+                 (:file "tbl-tests" :depends-on ("suite"))
+                 (:file "construct-tests" :depends-on ("suite")))))
   :perform (asdf:test-op (o c) (symbol-call :fiveam :run! :cl-tibble)))
