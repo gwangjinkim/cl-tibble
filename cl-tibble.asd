@@ -9,7 +9,8 @@
                 ((:file "package")
                  (:file "conditions" :depends-on ("package"))
                  (:file "tbl" :depends-on ("package"))
-                 (:file "construct" :depends-on ("tbl")))))
+                 (:file "construct" :depends-on ("tbl"))
+                 (:file "access" :depends-on ("construct")))))
   :in-order-to ((asdf:test-op (asdf:test-op "cl-tibble/test"))))
 
 (asdf:defsystem "cl-tibble/test"
@@ -22,5 +23,6 @@
                 ((:file "package")
                  (:file "suite" :depends-on ("package"))
                  (:file "tbl-tests" :depends-on ("suite"))
-                 (:file "construct-tests" :depends-on ("suite")))))
+                 (:file "construct-tests" :depends-on ("suite"))
+                 (:file "access-tests" :depends-on ("suite")))))
   :perform (asdf:test-op (o c) (symbol-call :fiveam :run! :cl-tibble)))

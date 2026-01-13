@@ -12,4 +12,8 @@
            #:as-tibble
            #:tribble
            #:enframe
-           #:deframe))
+           #:deframe
+           #:tbl-col
+           #:tbl-ref
+           #:slice
+           #:unknown-column-error))

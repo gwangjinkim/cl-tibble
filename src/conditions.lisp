@@ -22,6 +22,13 @@
                      (error-name condition))))
   (:documentation "Signaled when column names are not unique."))
 
+(define-condition unknown-column-error (tibble-error)
+  ((name :initarg :name :reader error-name))
+  (:report (lambda (condition stream)
+             (format stream "tibble: Column not found: ~S."
+                     (error-name condition))))
+  (:documentation "Signaled when a requested column does not exist."))
+
 (define-condition simple-tibble-error (tibble-error simple-error)
   ()
   (:documentation "Simple error wrapper for format strings."))
