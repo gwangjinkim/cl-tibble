@@ -52,6 +52,4 @@
                    :names names
                    :nrows (or nrows 0))))
 
-(defmethod print-object ((obj tbl) stream)
-  (print-unreadable-object (obj stream :type t :identity t)
-    (format stream "~D x ~D" (tbl-nrows obj) (length (tbl-names obj)))))
+
