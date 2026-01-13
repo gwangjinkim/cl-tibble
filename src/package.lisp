@@ -21,4 +21,8 @@
            #:glimpse
            #:bind-rows
            #:bind-cols
+           #:with-tibble
+           #:chain
+           #:do-rows
+           #:prt
            #:unknown-column-error))

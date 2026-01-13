@@ -12,7 +12,8 @@
                  (:file "construct" :depends-on ("tbl"))
                  (:file "access" :depends-on ("construct"))
                  (:file "print" :depends-on ("access"))
-                 (:file "bind" :depends-on ("construct")))))
+                 (:file "bind" :depends-on ("construct"))
+                 (:file "dsl" :depends-on ("bind" "print")))))
   :in-order-to ((asdf:test-op (asdf:test-op "cl-tibble/test"))))
 
 (asdf:defsystem "cl-tibble/test"
@@ -28,5 +29,6 @@
                  (:file "construct-tests" :depends-on ("suite"))
                  (:file "access-tests" :depends-on ("suite"))
                  (:file "print-tests" :depends-on ("suite"))
-                 (:file "bind-tests" :depends-on ("suite")))))
+                 (:file "bind-tests" :depends-on ("suite"))
+                 (:file "dsl-tests" :depends-on ("suite")))))
   :perform (asdf:test-op (o c) (symbol-call :fiveam :run! :cl-tibble)))
