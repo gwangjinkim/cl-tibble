@@ -1,5 +1,6 @@
 (defpackage :cl-tibble
   (:use :cl :cl-vctrs-lite)
+  (:nicknames #:tibble)
   (:export #:tbl
            #:make-tbl
            #:tbl-columns
