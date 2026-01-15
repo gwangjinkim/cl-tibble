@@ -1,6 +1,6 @@
 (asdf:defsystem "cl-tibble"
   :description "A strict, modern data frame implementation for Common Lisp, modeled on R's tibble."
-  :author "Antigravity"
+  :author "Gwang-Jin Kim <gwang.jin.kim.phd@gmail.com>"
   :license "MIT"
   :version "0.1.0"
   :depends-on (:cl-vctrs-lite)
