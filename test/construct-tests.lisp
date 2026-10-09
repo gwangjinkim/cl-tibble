@@ -26,10 +26,10 @@
       (tibble "x" #(1 2 3) "y" #(1 2))
     (error (e)
       (declare (ignore e))
-      (is t "Correctly signaled error"))
+      (pass "Correctly signaled error"))
     (:no-error (&rest args)
       (declare (ignore args))
-      (is nil "Should have signaled error"))))
+      (is-true nil "Should have signaled error"))))
 
 (test tribble-basic
   "Test row-wise construction."

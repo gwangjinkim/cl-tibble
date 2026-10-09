@@ -37,10 +37,10 @@
         (d2 (tibble :y #(1 2))))
     (handler-case
         (bind-cols d1 d2)
-      (error () (is t))
+      (error () (pass))
       (:no-error (&rest args) 
         (declare (ignore args))
-        (is nil "Should error on mismatch")))))
+        (is-true nil "Should error on mismatch")))))
 
 (test bind-cols-duplicate
   "Test duplicate column error."
@@ -48,5 +48,5 @@
         (d2 (tibble :x #(2))))
     (handler-case
         (bind-cols d1 d2)
-      (duplicate-column-error () (is t))
-      (error () (is nil "Wrong error type")))))
+      (duplicate-column-error () (pass))
+      (error () (is-true nil "Wrong error type")))))

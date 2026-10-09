@@ -16,12 +16,12 @@
       (make-tbl '(("x" . #(1 2 3))
                   ("y" . #(1 2))))
     (column-length-error () 
-      (is t))
+      (pass))
     (error (c) 
       (is nil "Expected COLUMN-LENGTH-ERROR but got ~S" (type-of c)))
     (:no-error (&rest args)
       (declare (ignore args))
-      (is nil "Did not signal any error."))))
+      (is-true nil "Did not signal any error."))))
 
 (test make-tbl-duplicate-error
   "Test that duplicate column names signal an error."
@@ -29,7 +29,7 @@
       (make-tbl '(("x" . #(1))
                   ("x" . #(2))))
     (duplicate-column-error ()
-      (is t))
+      (pass))
     (error (c)
       (is nil "Expected DUPLICATE-COLUMN-ERROR but got ~S" (type-of c)))))
 

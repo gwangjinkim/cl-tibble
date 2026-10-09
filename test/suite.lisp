@@ -6,4 +6,4 @@
 (in-suite :cl-tibble)
 
 (test sanity-check
-  (is t))
+  (pass))

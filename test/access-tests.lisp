@@ -16,16 +16,16 @@
   (let ((df (tibble "x" #(1))))
     (handler-case
         (tbl-col df "z")
-      (unknown-column-error () (is t))
+      (unknown-column-error () (pass))
       (error (c) 
         (declare (ignore c))
-        (is nil "Wrong error type")))
+        (is-true nil "Wrong error type")))
     (handler-case
         (tbl-col df 10)
-      (error () (is t)) ;; Checks bounds error
+      (error () (pass)) ;; Checks bounds error
       (:no-error (&rest args) 
         (declare (ignore args))
-        (is nil "Should error out of bounds")))))
+        (is-true nil "Should error out of bounds")))))
 
 (test tbl-ref-cell
   "Test cell access."
@@ -50,7 +50,7 @@
     (is (equalp #("a" "c") (tbl-names sub)))
     (handler-case
         (tbl-col sub :b)
-      (unknown-column-error () (is t))
+      (unknown-column-error () (pass))
       (error (c) (is nil "Expected UNKNOWN-COLUMN-ERROR but got ~S" (type-of c))))))
 
 (test slice-combined
