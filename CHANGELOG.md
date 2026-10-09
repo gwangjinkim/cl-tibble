@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format follows
 
 ## [Unreleased]
 
+### Fixed
+- `row-binding-na`: missing columns now contain the shared NA singleton
+  instead of logical FALSE, restoring the existing C1 missing-value contract.
+
 ### Changed
 - AGENTS.md: "Parity work" section listing this repository's parity
   milestones (X3, TB1, TB2, TB3, TB4) and where the plan and backlog live
@@ -17,6 +21,8 @@ All notable changes to this project are documented here. Format follows
   remain in history (topic: repo hygiene).
 
 ### Tests
+- `row-binding-na`: existing fill assertions now check NA rather than FALSE;
+  all 69 checks pass in the isolated pre-X2 owner snapshot.
 - Replaced bare `(is t)` / `(is x)` assertions with `(pass)` /
   `(is-true x)`. Current FiveAM rejects a non-list argument to `IS` at
   macroexpansion time, so 8 error-path tests (duplicate columns, length

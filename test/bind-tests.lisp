@@ -12,14 +12,14 @@
     (is (equalp #(2 4) (tbl-col res :y)))))
 
 (test bind-rows-fill
-  "Test filling missing columns with NIL."
+  "Test filling missing columns with the shared NA singleton."
   (let* ((d1 (tibble :x #(1)))
          (d2 (tibble :y #(2)))
          (res (bind-rows d1 d2)))
     (is (= 2 (tbl-nrows res)))
     (is (equalp #("x" "y") (tbl-names res)))
-    (is (equalp #(1 nil) (tbl-col res :x)))
-    (is (equalp #(nil 2) (tbl-col res :y)))))
+    (is (equalp (vector 1 cl-vctrs-lite:*na*) (tbl-col res :x)))
+    (is (equalp (vector cl-vctrs-lite:*na* 2) (tbl-col res :y)))))
 
 (test bind-cols-basic
   "Test simple horizontal binding."

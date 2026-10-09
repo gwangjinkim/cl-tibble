@@ -2,7 +2,7 @@
 
 (defun bind-rows (&rest tibbles)
   "Combine TIBBLES vertically.
-   Columns are matched by name. Missing columns are filled with NIL."
+   Columns are matched by name. Missing columns are filled with the shared NA singleton."
   (if (null tibbles)
       (make-tbl '())
       (let* ((all-names (make-array 0 :element-type 'string :fill-pointer 0 :adjustable t))
@@ -25,9 +25,9 @@
                              ;; Append existing column
                              (loop for x across col
                                    do (vector-push-extend x combined-vec))
-                             ;; Column missing in this tbl, append Nils
+                             ;; Column missing in this tbl, append NAs
                              (loop repeat nrows
-                                   do (vector-push-extend nil combined-vec)))))
+                                   do (vector-push-extend cl-vctrs-lite:*na* combined-vec)))))
                      (push (cons name combined-vec) new-alist)))
           (make-tbl (nreverse new-alist))))))
 
