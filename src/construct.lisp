@@ -1,27 +1,15 @@
 (in-package :cl-tibble)
 
+(defun %column-input-p (x)
+  ;; Existing Lisp lists are scalar tibble cells; explicit list columns use vectors.
+  (and (cl-vctrs-lite:column-p x) (not (listp x))))
+
 (defun recycle-value (val n)
-  "Recycle VAL to length N.
-   - If N=0, return empty vector.
-   - If VAL is a vector of length N, return it.
-   - If VAL is a vector of length 1, repeat it N times.
-   - If VAL is not a vector, repeat it N times.
-   - Otherwise signal error."
-  (cond
-    ((= n 0) #())
-    ((vectorp val)
-     (let ((len (length val)))
-       (cond
-         ((= len n) val)
-         ((= len 1)
-          ;; Recycle length 1 vector
-          (let ((el (aref val 0)))
-            (make-array n :initial-element el)))
-         (t
-          (error "tibble: Cannot recycle vector of length ~A to length ~A." len n)))))
-    (t
-     ;; Scalar -> Vector
-     (make-array n :initial-element val))))
+  "Recycle a scalar or column to N rows, preserving X2 prototypes."
+  (if (%column-input-p val)
+      (cl-vctrs-lite:recycle-to val n)
+      (cl-vctrs-lite:restore-column (make-array n :initial-element val)
+                                    (cl-vctrs-lite:vec-prototype (vector val)))))
 
 (defun tibble (&rest key-values)
   "Create a tibble from KEY-VALUE pairs.
@@ -42,8 +30,8 @@
     (let ((max-len 1))
       (dolist (pair kv-pairs)
         (let ((val (cdr pair)))
-          (when (and (vectorp val) (> (length val) 1))
-            (setf max-len (max max-len (length val))))))
+          (when (and (%column-input-p val) (> (cl-vctrs-lite:col-length val) 1))
+            (setf max-len (max max-len (cl-vctrs-lite:col-length val))))))
       
       ;; If NO vectors > 1 found, check if any vectors of length 0 exist?
       ;; R tibble rules:
@@ -51,7 +39,7 @@
       ;; Let's iterate again to check for explicit 0s which force output to 0.
       (dolist (pair kv-pairs)
          (let ((val (cdr pair)))
-           (when (and (vectorp val) (= (length val) 0))
+           (when (and (%column-input-p val) (= (cl-vctrs-lite:col-length val) 0))
              (setf max-len 0))))
       
       ;; 3. Recycle and build
@@ -59,9 +47,7 @@
         (dolist (pair kv-pairs)
           (let ((name (car pair))
                 (val (cdr pair)))
-            (if (= max-len 0)
-                (push (cons name #()) final-alist)
-                (push (cons name (recycle-value val max-len)) final-alist))))
+            (push (cons name (recycle-value val max-len)) final-alist)))
         (make-tbl (nreverse final-alist))))))
 
 (defgeneric as-tibble (x)

@@ -12,7 +12,7 @@
     (is (equalp #(2 4) (tbl-col res :y)))))
 
 (test bind-rows-fill
-  "Test filling missing columns with the shared NA singleton."
+  "Test filling missing columns with typed NA (C1 and X2)."
   (let* ((d1 (tibble :x #(1)))
          (d2 (tibble :y #(2)))
          (res (bind-rows d1 d2)))
@@ -50,3 +50,8 @@
         (bind-cols d1 d2)
       (duplicate-column-error () (pass))
       (error () (is-true nil "Wrong error type")))))
+
+(test x2-bind-preserves-empty-prototypes
+  (let ((df (bind-rows (tibble :x (cl-vctrs-lite:vec-init :double 0)) (tibble :x #(1)))))
+    (is (eq :double (cl-vctrs-lite:col-type (tbl-col df :x))))
+    (is (typep (aref (tbl-col df :x) 0) 'double-float))))

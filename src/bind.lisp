@@ -1,35 +1,20 @@
 (in-package :cl-tibble)
 
 (defun bind-rows (&rest tibbles)
-  "Combine TIBBLES vertically.
-   Columns are matched by name. Missing columns are filled with the shared NA singleton."
-  (if (null tibbles)
-      (make-tbl '())
-      (let* ((all-names (make-array 0 :element-type 'string :fill-pointer 0 :adjustable t))
-             (seen-names (make-hash-table :test 'equal)))
-        ;; 1. Collect all column names in order
-        (dolist (tbl tibbles)
-          (loop for name across (tbl-names tbl)
-                do (unless (gethash name seen-names)
-                     (setf (gethash name seen-names) t)
-                     (vector-push-extend name all-names))))
-        
-        ;; 2. Build new columns
-        (let ((new-alist '()))
-          (loop for name across all-names
-                do (let ((combined-vec (make-array 0 :fill-pointer 0 :adjustable t)))
-                     (dolist (tbl tibbles)
-                       (let ((nrows (tbl-nrows tbl))
-                             (col (gethash name (tbl-columns tbl))))
-                         (if col
-                             ;; Append existing column
-                             (loop for x across col
-                                   do (vector-push-extend x combined-vec))
-                             ;; Column missing in this tbl, append NAs
-                             (loop repeat nrows
-                                   do (vector-push-extend cl-vctrs-lite:*na* combined-vec)))))
-                     (push (cons name combined-vec) new-alist)))
-          (make-tbl (nreverse new-alist))))))
+  "R: dplyr::bind_rows(). Bind columns using X2 prototypes, filling absent columns with typed NA."
+  (let ((names (remove-duplicates (loop for tbl in tibbles append (coerce (tbl-names tbl) 'list))
+                                  :test #'equal :from-end t)))
+    (make-tbl
+     (loop for name in names
+           for present = (loop for tbl in tibbles for col = (gethash name (tbl-columns tbl))
+                               when col collect col)
+           for prototype = (reduce (lambda (a b) (cl-vctrs-lite:common-prototype a b :strict nil))
+                                    (cdr present) :initial-value (cl-vctrs-lite:vec-prototype (first present)))
+           collect (cons name
+                         (apply #'cl-vctrs-lite:vec-c
+                                (loop for tbl in tibbles
+                                      collect (or (gethash name (tbl-columns tbl))
+                                                  (cl-vctrs-lite:vec-init prototype (tbl-nrows tbl))))))))))
 
 (defun bind-cols (&rest tibbles)
   "Combine TIBBLES horizontally.

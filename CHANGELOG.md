@@ -10,7 +10,14 @@ All notable changes to this project are documented here. Format follows
 - `row-binding-na`: missing columns now contain the shared NA singleton
   instead of logical FALSE, restoring the existing C1 missing-value contract.
 
+### Added
+- `parity-X2`: print Date, datetime, time, Duration, factor and list-column
+  abbreviations from the shared prototype, including empty/all-NA columns.
+
 ### Changed
+- `parity-X2`: construction, slicing and row binding preserve prototypes
+  and factor levels through the shared column protocol. Strings recycle as
+  scalar character cells; existing Lisp lists remain scalar cells.
 - AGENTS.md: "Parity work" section listing this repository's parity
   milestones (X3, TB1, TB2, TB3, TB4) and where the plan and backlog live
   (topic: parity plan).
@@ -21,8 +28,10 @@ All notable changes to this project are documented here. Format follows
   remain in history (topic: repo hygiene).
 
 ### Tests
-- `row-binding-na`: existing fill assertions now check NA rather than FALSE;
-  all 69 checks pass in the isolated pre-X2 owner snapshot.
+- `row-binding-na`: fill assertions check NA instead of FALSE; isolated
+  pre-X2 owner suite passes 69 checks, final X2 suite passes 81.
+- `parity-X2`: 12 new prototype/printing/binding checks; 81 package checks
+  pass, with additional factor/date/list regressions in cl-tidystat.
 - Replaced bare `(is t)` / `(is x)` assertions with `(pass)` /
   `(is-true x)`. Current FiveAM rejects a non-list argument to `IS` at
   macroexpansion time, so 8 error-path tests (duplicate columns, length

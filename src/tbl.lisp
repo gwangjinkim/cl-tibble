@@ -29,7 +29,7 @@
     (dolist (pair alist)
       (let* ((name (string (car pair))) ; ensure string
              (col (cdr pair)) ;; In future, we might coerce to vector here using cl-vctrs-lite
-             (len (length col))) 
+             (len (cl-vctrs-lite:col-length col)))
         
         ;; 1. Check uniqueness
         (when (gethash name seen-names)

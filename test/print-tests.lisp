@@ -34,3 +34,12 @@
       (is (search "Rows: 1" s))
       (is (search "Columns: 2" s))
       (is (search "$ x <int> 1," s)))))
+
+(test x2-print-types-from-prototypes
+  (dolist (entry '((:date . "<date>") (:datetime . "<dttm>") (:time . "<time>")
+                   (:duration . "<Duration>") (:list . "<list>") (:bool . "<lgl>")))
+    (let ((df (tibble :x (cl-vctrs-lite:vec-init (car entry) 2))))
+      (is (search (cdr entry) (princ-to-string df)))))
+  (is (search "<dbl>" (princ-to-string (tibble :x (cl-vctrs-lite:vec-init :double 0)))))
+  (let* ((x (cl-vctrs-lite:vec-init :date 2)) (df (tibble :x x)))
+    (is (eq :date (cl-vctrs-lite:col-type (tbl-col (slice df :rows '(1)) :x))))))

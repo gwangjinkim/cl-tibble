@@ -138,3 +138,23 @@ Or in Lisp:
 ```lisp
 (asdf:test-system :cl-tibble)
 ```
+
+## Typed columns (parity X2)
+
+Construction, slicing and row binding use the shared cl-vctrs-lite column
+protocol. Typed empty and all-NA columns retain their prototype. Printing
+and `glimpse` show `<date>`, `<dttm>`, `<time>`, `<Duration>`, `<fct>`/`<ord>`
+and `<list>`, alongside the existing atomic abbreviations. Full pillar
+layout/formatting remains milestone X3.
+
+```lisp
+(tibble :date (cl-vctrs-lite:vec-init :date 2)
+        :nested (cl-vctrs-lite:make-typed-column (vector '(1 2) nil) :list))
+```
+
+With cl-forcats loaded, factor objects can be columns and remain factors
+through slicing and binding; their levels are retained/unioned. Absent
+columns in row binding use typed NA, not logical FALSE. Scalar strings
+recycle as character cells. Existing Lisp list inputs remain scalar cells;
+construct explicit list columns with `make-typed-column` and a vector.
+These changes do not implement factor support in every dplyr verb.

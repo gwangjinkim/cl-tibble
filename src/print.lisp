@@ -1,16 +1,12 @@
 (in-package :cl-tibble)
 
 (defun vec-type-abbrev (vec)
-  "Return a short string representing the type of elements in VEC."
-  (if (= 0 (length vec))
-      "<empty>"
-      (let ((el (aref vec 0)))
-        (typecase el
-          (integer "<int>")
-          (float   "<dbl>")
-          (string  "<chr>")
-          (keyword "<key>")
-          (t       "<obj>")))))
+  "R: pillar::type_sum(). Describe the whole column, retaining typed NA/empty prototypes."
+  (case (cl-vctrs-lite:col-type vec)
+    (:int "<int>") (:double "<dbl>") (:string "<chr>") (:bool "<lgl>")
+    (:date "<date>") (:datetime "<dttm>") (:time "<time>") (:duration "<Duration>")
+    (:factor (if (cl-vctrs-lite:prototype-ordered (cl-vctrs-lite:vec-prototype vec)) "<ord>" "<fct>"))
+    (:list "<list>") (otherwise (if (zerop (cl-vctrs-lite:col-length vec)) "<empty>" "<obj>"))))
 
 (defun format-cell (val)
   "Return string representation of VAL for printing."
@@ -37,7 +33,7 @@
                                    collect 
                                    (let ((w (max (length name) (length type-str))))
                                      (dotimes (i display-rows)
-                                       (setf w (max w (length (format-cell (aref col i))))))
+                                       (setf w (max w (length (format-cell (cl-vctrs-lite:col-ref col i))))))
                                      w))))
             
             ;; Print Header
@@ -56,7 +52,7 @@
             (dotimes (i display-rows)
               (loop for col in col-data
                     for w in col-widths
-                    do (format stream "~VA  " w (format-cell (aref col i))))
+                    do (format stream "~VA  " w (format-cell (cl-vctrs-lite:col-ref col i))))
               (format stream "~%"))
             
             (when (> nrows display-rows)
@@ -73,6 +69,6 @@
                     (type (vec-type-abbrev col))
                     (preview (with-output-to-string (s)
                                (format s "")
-                               (dotimes (i (min 5 (length col)))
-                                 (format s "~A, " (format-cell (aref col i)))))))
+                               (dotimes (i (min 5 (cl-vctrs-lite:col-length col)))
+                                 (format s "~A, " (format-cell (cl-vctrs-lite:col-ref col i)))))))
                (format stream "$ ~A ~A ~A...~%" name type preview)))))

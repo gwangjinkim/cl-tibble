@@ -24,9 +24,9 @@
 (defun tbl-ref (tbl row col-spec)
   "Retrieve the value at ROW and COL-SPEC."
   (let ((vec (tbl-col tbl col-spec)))
-    (unless (and (>= row 0) (< row (length vec)))
+    (unless (and (>= row 0) (< row (cl-vctrs-lite:col-length vec)))
       (error "tibble: Row index ~D out of bounds." row))
-    (aref vec row)))
+    (cl-vctrs-lite:col-ref vec row)))
 
 (defun slice (tbl &key rows cols)
   "Return a new tibble with a subset of rows and/or columns.
@@ -42,20 +42,7 @@
       (dolist (name keep-names)
         (let ((orig-vec (tbl-col tbl name))
               (new-vec nil))
-          (if rows
-              ;; Subset rows
-              (progn
-                (setf new-vec (make-array (length rows)))
-                (loop for r-idx in rows
-                      for i from 0
-                      do (setf (aref new-vec i) (aref orig-vec r-idx))))
-              ;; Keep all rows (copy or ref? Let's copy to be safe/clean for now, though ref is faster)
-              ;; R's slice usually copies.
-              ;; But actually, cl-vctrs-lite might want copies.
-              ;; Let's make a copy to ensure structural sharing doesn't cause weird mutation issues later 
-              ;; if we ever introduce mutation (though we aim for functional).
-              ;; Actually, if we don't mutate, sharing is fine.
-              ;; For now: COPY to be safe.
-              (setf new-vec (copy-seq orig-vec)))
+          (setf new-vec (cl-vctrs-lite:col-subseq
+                           orig-vec (or rows (loop for i below (cl-vctrs-lite:col-length orig-vec) collect i))))
           (push (cons name new-vec) new-alist)))
       (make-tbl (nreverse new-alist)))))

@@ -47,3 +47,8 @@
     (is (equalp #("name" "value") (tbl-names df)))
     (is (equalp #(1 2 3) (gethash "name" (tbl-columns df))))
     (is (equalp #(10 20 30) (gethash "value" (tbl-columns df))))))
+
+(test x2-scalar-string-is-a-character-cell
+  (let ((df (tibble :label "hello" :i #(1 2))))
+    (is (equalp #("hello" "hello") (tbl-col df :label)))
+    (is (eq :string (cl-vctrs-lite:col-type (tbl-col df :label))))))
