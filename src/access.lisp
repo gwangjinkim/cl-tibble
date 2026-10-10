@@ -14,12 +14,13 @@
     (t (error "tibble: Invalid column specifier: ~S" col-spec))))
 
 (defun tbl-col (tbl col-spec)
-  "Retrieve the vector for column COL-SPEC (name or index)."
+  "Retrieve a column by name or zero-based position. Names select the first occurrence.
+Unchecked NEW-TIBBLE objects may contain NIL columns until validation."
   (let* ((name (resolve-col-name tbl col-spec))
-         (col (gethash name (tbl-columns tbl))))
-    (unless col
-      (error 'unknown-column-error :name name))
-    col))
+         (present (nth-value 1 (gethash name (tbl-columns tbl)))))
+    (unless present (error 'unknown-column-error :name name))
+    (if (integerp col-spec) (%tbl-column-at tbl col-spec)
+        (gethash name (tbl-columns tbl)))))
 
 (defun tbl-ref (tbl row col-spec)
   "Retrieve the value at ROW and COL-SPEC."
@@ -29,20 +30,17 @@
     (cl-vctrs-lite:col-ref vec row)))
 
 (defun slice (tbl &key rows cols)
-  "Return a new tibble with a subset of rows and/or columns.
-   ROWS: List of integer indices. If NIL, keep all.
-   COLS: List of column names/indices. If NIL, keep all."
-  ;; 1. Determine columns to keep
-  (let ((keep-names (if cols
-                        (mapcar (lambda (c) (resolve-col-name tbl c)) cols)
-                        (coerce (tbl-names tbl) 'list))))
-    
-    ;; 2. Build new columns
-    (let ((new-alist '()))
-      (dolist (name keep-names)
-        (let ((orig-vec (tbl-col tbl name))
-              (new-vec nil))
-          (setf new-vec (cl-vctrs-lite:col-subseq
-                           orig-vec (or rows (loop for i below (cl-vctrs-lite:col-length orig-vec) collect i))))
-          (push (cons name new-vec) new-alist)))
-      (make-tbl (nreverse new-alist)))))
+  "Return a tibble subset, preserving positional minimally named columns.
+ROWS and COLS use zero-based positions; NIL retains all, as in the legacy API."
+  (let* ((indices (if cols (mapcar (lambda (spec)
+                                    (if (integerp spec)
+                                        (progn (resolve-col-name tbl spec) spec)
+                                        (let* ((name (resolve-col-name tbl spec))
+                                               (index (position name (tbl-names tbl) :test #'equal)))
+                                          (unless index (error 'unknown-column-error :name name))
+                                          index))) cols)
+                      (loop for i below (length (tbl-names tbl)) collect i)))
+         (row-indices (or rows (loop for i below (tbl-nrows tbl) collect i))))
+    (%allocate-tbl (map 'vector (lambda (i) (aref (tbl-names tbl) i)) indices)
+                   (map 'vector (lambda (i) (col-subseq (%tbl-column-at tbl i) row-indices)) indices)
+                   (length row-indices))))

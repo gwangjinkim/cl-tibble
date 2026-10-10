@@ -35,7 +35,7 @@
         (g-cols (gensym "COLS")))
     `(let* ((,g-tbl ,tbl)
             (,g-names (tbl-names ,g-tbl))
-            (,g-cols (map 'vector (lambda (n) (gethash n (tbl-columns ,g-tbl))) ,g-names))
+            (,g-cols (coerce (loop for i below (length ,g-names) collect (%tbl-column-at ,g-tbl i)) 'vector))
             (,g-len (tbl-nrows ,g-tbl)))
        (dotimes (,g-i ,g-len ,result)
          (let ((,row-var (loop for ,g-idx from 0

@@ -158,3 +158,62 @@ columns in row binding use typed NA, not logical FALSE. Scalar strings
 recycle as character cells. Existing Lisp list inputs remain scalar cells;
 construct explicit list columns with `make-typed-column` and a vector.
 These changes do not implement factor support in every dplyr verb.
+
+## Constructors and coercion (TB1)
+
+| R | Common Lisp |
+|---|---|
+| `tibble`, `tibble_row` | `tibble`, `tibble-row` |
+| `as_tibble`, `as_tibble_col`, `as_tibble_row` | `as-tibble`, `as-tibble-col`, `as-tibble-row` |
+| `enframe`, `deframe` | `enframe`, `deframe` |
+| `tribble`, `frame_matrix` | `tribble`, `frame-matrix` |
+| `new_tibble`, `validate_tibble` | `new-tibble`, `validate-tibble` |
+| `is_tibble`, `lst` | `is-tibble`, `lst` |
+
+`computed-column` receives a partial tibble for sequential construction;
+`tibble*` offers lexical syntax while `tibble` remains callable by APPLY.
+Explicit typed :LIST columns represent R lists. Plain lists supplied to
+`tibble` keep their existing scalar-cell meaning; `enframe` retains its
+existing atomic interpretation unless `:list-column t` is supplied.
+`null-column` represents an omitted R NULL column separately from scalar
+NIL (logical FALSE).
+
+`tibble` accepts a leading `constructor-options` object for row counts and
+name repair; flat `:rows` and `:name-repair` keys remain ordinary columns.
+`as-tibble` retains its one-argument generic extension signature. Use the
+additive `as-tibble-options` helper for row counts and name repair. Repair
+strategies are `:check-unique`, `:unique`, `:universal` and `:minimal`;
+quiet variants and a callback are also supported. Minimal duplicate names
+retain positional columns: `(tbl-col df 1)` reads the second column, while
+name lookup and `tbl-columns` expose the first occurrence. Repair to unique
+names before using sibling verbs; their duplicate-name behavior is not
+certified. `make-tbl` continues to reject duplicates.
+
+`frame-matrix` accepts an explicit vector of header strings followed by
+row-major cells. It returns a rank-two array, names and a type keyword as
+three values. Private weak metadata lets `as-tibble` consume that matrix
+with its labels and empty prototype. Nested tibble/matrix columns are
+rejected until a shared C2 owner protocol can preserve their shape.
+`new-tibble` stores an explicit row count without validating column lengths;
+`validate-tibble` performs that check. Its optional attributes can be read
+with `tbl-attribute`; general metadata restoration belongs to later work.
+
+TB1 remains partial. Direct `as-tibble` keyword options, packed/matrix
+column owners, full R expression-label generation and dynamic splice
+lexical scope are not certified. Existing `deframe` defaults keep alists
+for two columns; additive `:named-vector t` opts into owner-preserving
+atomic names or D12 list results. The default return migration awaits the
+maintainer's decision in the umbrella compatibility proposal. Printing
+parity remains X3. No native function invokes R.
+
+Scalar NIL is logical FALSE in the new column/row coercions; use
+`null-column` for R NULL. A computed callback returning `null-column`
+omits that column. Existing `as-tibble` alist columns supplied as proper
+lists retain their multiple-row atomic interpretation; plist and `tibble`
+proper-list cells keep their scalar-cell interpretation.
+
+Validation: 182 package checks and 133 active pinned R 4.6.1 / tibble 3.3.1
+cases pass (125 constructor cases plus eight baseline cases). Eight genuine
+unsupported or pending-default mismatches remain archived outside active
+parity credit. Row/list constructors and validators remain partial for
+nested matrix/frame owners even when their ordinary inputs pass.

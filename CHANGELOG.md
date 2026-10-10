@@ -7,10 +7,21 @@ All notable changes to this project are documented here. Format follows
 ## [Unreleased]
 
 ### Fixed
+- `parity-TB1`: Core slicing/printing/row iteration retain duplicate columns.
+  Unique names still read the public hash after mutation; missing slice
+  columns retain UNKNOWN-COLUMN-ERROR. Proper-list alist columns retain
+  their legacy row count. Typed scalar NA, FALSE/explicit NULL and computed
+  NULL omission have regression coverage. Nested matrix/frame owners are
+  rejected clearly; default migrations and scientific formatting stay partial.
 - `row-binding-na`: missing columns now contain the shared NA singleton
   instead of logical FALSE, restoring the existing C1 missing-value contract.
 
 ### Added
+- `parity-TB1`: Add eight constructor/coercion/predicate APIs, sequential
+  computed columns and lexical syntax, explicit constructor controls,
+  four name-repair strategies, duplicate-name positional storage and
+  unchecked row-count/attribute construction. Callable TIBBLE and the
+  one-argument AS-TIBBLE extension generic remain available.
 - `parity-X2`: print Date, datetime, time, Duration, factor and list-column
   abbreviations from the shared prototype, including empty/all-NA columns.
 
@@ -28,6 +39,10 @@ All notable changes to this project are documented here. Format follows
   remain in history (topic: repo hygiene).
 
 ### Tests
+- `parity-TB1`: Package checks increase from 81 to 182, all passing;
+  125 new active pinned-R cases bring tibble to 133. Eight genuine partial
+  proofs are archived separately; adapter projections do not grant full
+  function credit. Concrete compatibility regressions failed before repair.
 - `row-binding-na`: fill assertions check NA instead of FALSE; isolated
   pre-X2 owner suite passes 69 checks, final X2 suite passes 81.
 - `parity-X2`: 12 new prototype/printing/binding checks; 81 package checks

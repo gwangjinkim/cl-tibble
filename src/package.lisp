@@ -11,6 +11,10 @@
            #:duplicate-column-error
            #:tibble
            #:as-tibble
+           #:as-tibble-options
+           #:as-tibble-row #:as-tibble-col #:tibble-row
+           #:new-tibble #:validate-tibble #:is-tibble #:lst #:frame-matrix
+           #:null-column #:constructor-options #:computed-column #:tibble* #:tbl-attribute
            #:tribble
            #:enframe
            #:deframe

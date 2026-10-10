@@ -23,8 +23,7 @@
         
         (when (> (length names) 0)
           ;; Calculate column widths
-          (let* ((col-data (loop for name across names
-                                 collect (gethash name (tbl-columns tbl))))
+          (let* ((col-data (loop for i below (length names) collect (%tbl-column-at tbl i)))
                  (type-subheaders (mapcar #'vec-type-abbrev col-data))
                  (display-rows (min 10 nrows))
                  (col-widths (loop for name across names
@@ -64,8 +63,8 @@
         (names (tbl-names tbl)))
     (format stream "Rows: ~D~%" nrows)
     (format stream "Columns: ~D~%" (length names))
-    (loop for name across names
-          do (let* ((col (gethash name (tbl-columns tbl)))
+    (loop for name across names for i from 0
+          do (let* ((col (%tbl-column-at tbl i))
                     (type (vec-type-abbrev col))
                     (preview (with-output-to-string (s)
                                (format s "")

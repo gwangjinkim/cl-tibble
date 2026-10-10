@@ -9,6 +9,9 @@
           :type vector
           :reader tbl-names
           :documentation "Vector of column names (strings) in order.")
+   (ordered-columns :initarg :ordered-columns :initform nil
+                    :reader %tbl-ordered-columns
+                    :documentation "Optional positional storage for minimally named columns.")
    (nrows :initarg :nrows
           :type integer
           :reader tbl-nrows
@@ -53,3 +56,17 @@
                    :nrows (or nrows 0))))
 
 
+
+(defun %tbl-column-at (table index)
+  "Return a column by position, retaining duplicate minimally repaired names."
+  (if (%tbl-ordered-columns table)
+      (aref (%tbl-ordered-columns table) index)
+      (gethash (aref (tbl-names table) index) (tbl-columns table))))
+
+(defun %allocate-tbl (names columns nrows &optional (class 'tbl))
+  "Allocate without validation; public name lookup retains the first occurrence."
+  (let ((hash (make-hash-table :test 'equal)))
+    (loop for name across names for column across columns
+          unless (nth-value 1 (gethash name hash)) do (setf (gethash name hash) column))
+    (make-instance class :names names :columns hash :nrows nrows
+                         :ordered-columns (when (/= (length names) (hash-table-count hash)) columns))))
